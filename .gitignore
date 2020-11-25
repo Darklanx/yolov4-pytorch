@@ -1,0 +1,10 @@
+annotation/*
+*.h5
+*/logs/*
+./*/
+img/*
+*.pyc
+*.jpg
+*.png
+*.pth
+dataset/*

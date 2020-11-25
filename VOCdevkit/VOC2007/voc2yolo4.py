@@ -1,7 +1,7 @@
 import os
 import random 
  
-xmlfilepath=r'./VOCdevkit/VOC2007/Annotations'
+xmlfilepath=r'./VOCdevkit/VOC2007/Annotations/train'
 saveBasePath=r"./VOCdevkit/VOC2007/ImageSets/Main/"
  
 trainval_percent=1
@@ -14,10 +14,10 @@ for xml in temp_xml:
         total_xml.append(xml)
 
 num=len(total_xml)  
-list=range(num)  
+l=range(num)  
 tv=int(num*trainval_percent)  
 tr=int(tv*train_percent)  
-trainval= random.sample(list,tv)  
+trainval= random.sample(l, tv)  
 train=random.sample(trainval,tr)  
  
 print("train and val size",tv)
@@ -27,7 +27,7 @@ ftest = open(os.path.join(saveBasePath,'test.txt'), 'w')
 ftrain = open(os.path.join(saveBasePath,'train.txt'), 'w')  
 fval = open(os.path.join(saveBasePath,'val.txt'), 'w')  
  
-for i  in list:  
+for i in l:  
     name=total_xml[i][:-4]+'\n'  
     if i in trainval:  
         ftrainval.write(name)  

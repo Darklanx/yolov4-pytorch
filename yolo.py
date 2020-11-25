@@ -6,6 +6,7 @@ import numpy as np
 import colorsys
 import os
 import torch
+import traceback
 import torch.nn as nn
 from nets.yolo4 import YoloBody
 import torch.backends.cudnn as cudnn
@@ -19,12 +20,12 @@ from utils.utils import non_max_suppression, bbox_iou, DecodeBox,letterbox_image
 #--------------------------------------------#
 class YOLO(object):
     _defaults = {
-        "model_path": 'model_data/yolo4_weights.pth',
+        "model_path": 'logs/Epoch20-Total_Loss31.6551-Val_Loss12.4712.pth',
         "anchors_path": 'model_data/yolo_anchors.txt',
-        "classes_path": 'model_data/coco_classes.txt',
-        "model_image_size" : (416, 416, 3),
-        "confidence": 0.5,
-        "iou" : 0.3,
+        "classes_path": 'model_data/svhn_classes.txt',
+        "model_image_size" : (608, 608, 3),
+        "confidence": 0.01,
+        "iou" : 0.1,
         "cuda": True
     }
 
@@ -74,7 +75,7 @@ class YOLO(object):
         print('Loading weights into state dict...')
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         state_dict = torch.load(self.model_path, map_location=device)
-        self.net.load_state_dict(state_dict)
+        self.net.load_state_dict(state_dict['model'])
         
         if self.cuda:
             os.environ["CUDA_VISIBLE_DEVICES"] = '0'
@@ -125,10 +126,16 @@ class YOLO(object):
         batch_detections = non_max_suppression(output, len(self.class_names),
                                                 conf_thres=self.confidence,
                                                 nms_thres=self.iou)
+        predictions = {}
+        predictions["label"] = []
+        predictions["score"] = []
+        predictions["bbox"] = []
         try:
             batch_detections = batch_detections[0].cpu().numpy()
-        except:
-            return image
+        except Exception as e:
+            # print(batch_detections)
+            # traceback.print_exc()
+            return image, predictions
             
         top_index = batch_detections[:,4]*batch_detections[:,5] > self.confidence
         top_conf = batch_detections[top_index,4]*batch_detections[top_index,5]
@@ -142,12 +149,16 @@ class YOLO(object):
         font = ImageFont.truetype(font='model_data/simhei.ttf',size=np.floor(3e-2 * np.shape(image)[1] + 0.5).astype('int32'))
 
         thickness = (np.shape(image)[0] + np.shape(image)[1]) // self.model_image_size[0]
-
+        
+        
         for i, c in enumerate(top_label):
             predicted_class = self.class_names[c]
             score = top_conf[i]
 
             top, left, bottom, right = boxes[i]
+            predictions["bbox"].append(boxes[i].tolist()) 
+            predictions["score"].append(score.item()) 
+            predictions["label"].append(predicted_class) 
             top = top - 5
             left = left - 5
             bottom = bottom + 5
@@ -163,14 +174,16 @@ class YOLO(object):
             draw = ImageDraw.Draw(image)
             label_size = draw.textsize(label, font)
             label = label.encode('utf-8')
-            print(label)
+            # print(label)
             
             if top - label_size[1] >= 0:
                 text_origin = np.array([left, top - label_size[1]])
             else:
                 text_origin = np.array([left, top + 1])
 
-            for i in range(thickness):
+            # print("thickness: ", thickness)
+            # for i in range(thickness):
+            for i in range(2):
                 draw.rectangle(
                     [left + i, top + i, right - i, bottom - i],
                     outline=self.colors[self.class_names.index(predicted_class)])
@@ -178,6 +191,9 @@ class YOLO(object):
                 [tuple(text_origin), tuple(text_origin + label_size)],
                 fill=self.colors[self.class_names.index(predicted_class)])
             draw.text(text_origin, str(label,'UTF-8'), fill=(0, 0, 0), font=font)
-            del draw
-        return image
+
+            # del draw
+        
+        
+        return image, predictions
 

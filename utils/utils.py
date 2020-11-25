@@ -213,11 +213,11 @@ def non_max_suppression(prediction, num_classes, conf_thres=0.5, nms_thres=0.4):
 
         # 利用置信度进行第一轮筛选
         conf_mask = (image_pred[:, 4]*class_conf[:, 0] >= conf_thres).squeeze()
-
         image_pred = image_pred[conf_mask]
         class_conf = class_conf[conf_mask]
         class_pred = class_pred[conf_mask]
         if not image_pred.size(0):
+            # print("image_prd.size(0): ", image_pred.size(0))
             continue
         # 获得的内容为(x1, y1, x2, y2, obj_conf, class_conf, class_pred)
         detections = torch.cat((image_pred[:, :5], class_conf.float(), class_pred.float()), 1)
@@ -261,6 +261,7 @@ def non_max_suppression(prediction, num_classes, conf_thres=0.5, nms_thres=0.4):
             # Add max detections to outputs
             output[image_i] = max_detections if output[image_i] is None else torch.cat(
                 (output[image_i], max_detections))
+            # print(max_detections)
 
     return output
 

@@ -80,17 +80,17 @@ def load_data(path):
 if __name__ == '__main__':
     # 运行该程序会计算'./VOCdevkit/VOC2007/Annotations'的xml
     # 会生成yolo_anchors.txt
-    SIZE = 416
+    SIZE = 608
     anchors_num = 9
     # 载入数据集，可以使用VOC的xml
-    path = r'./VOCdevkit/VOC2007/Annotations'
+    path = r'./VOCdevkit/VOC2007/Annotations/train'
     
-    # 载入所有的xml
+    # 载入所有的xml`
     # 存储格式为转化为比例后的width,height
     data = load_data(path)
-    
+    print(data.shape)
     # 使用k聚类算法
-    out = kmeans(data,anchors_num)
+    out = kmeans(data, anchors_num)
     out = out[np.argsort(out[:,0])]
     print('acc:{:.2f}%'.format(avg_iou(data,out) * 100))
     print(out*SIZE)

@@ -1,6 +1,9 @@
 #-------------------------------------#
 #       对数据集进行训练
 #-------------------------------------#
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 import os
 import numpy as np
 import time
@@ -103,7 +106,8 @@ def fit_one_epoch(net,yolo_losses,epoch,epoch_size,epoch_size_val,gen,genval,Epo
     print('Total Loss: %.4f || Val Loss: %.4f ' % (total_loss/(epoch_size+1),val_loss/(epoch_size_val+1)))
 
     print('Saving state, iter:', str(epoch+1))
-    torch.save(model.state_dict(), 'logs/Epoch%d-Total_Loss%.4f-Val_Loss%.4f.pth'%((epoch+1),total_loss/(epoch_size+1),val_loss/(epoch_size_val+1)))
+    save = {"model": model.state_dict(), "optimizer": optimizer.state_dict()}
+    torch.save(save, 'logs/Epoch%d-Total_Loss%.4f-Val_Loss%.4f.pth'%((epoch+1),total_loss/(epoch_size+1),val_loss/(epoch_size_val+1)))
 
 #----------------------------------------------------#
 #   检测精度mAP和pr曲线计算参考视频
@@ -115,7 +119,8 @@ if __name__ == "__main__":
     #   显存比较小可以使用416x416
     #   显存比较大可以使用608x608
     #-------------------------------#
-    input_shape = (416,416)
+    # input_shape = (416,416)
+    input_shape = (608,608)
     #-------------------------------#
     #   tricks的使用设置
     #-------------------------------#
@@ -125,7 +130,7 @@ if __name__ == "__main__":
     Cuda = True
     smoooth_label = 0
     #-------------------------------#
-    #   Dataloder的使用
+    #   Dataloader的使用
     #-------------------------------#
     Use_Data_Loader = True
 
@@ -133,8 +138,8 @@ if __name__ == "__main__":
     #-------------------------------#
     #   获得先验框和类
     #-------------------------------#
-    anchors_path = 'model_data/yolo_anchors.txt'
-    classes_path = 'model_data/voc_classes.txt'   
+    anchors_path = './yolo_anchors.txt'
+    classes_path = 'model_data/svhn_classes.txt'   
     class_names = get_classes(classes_path)
     anchors = get_anchors(anchors_path)
     num_classes = len(class_names)
@@ -144,7 +149,9 @@ if __name__ == "__main__":
     #-------------------------------------------#
     #   权值文件的下载请看README
     #-------------------------------------------#
-    model_path = "model_data/yolo4_weights.pth"
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    '''
+    model_path = "model_data/yolo4_voc_weights.pth"
     # 加快模型训练的效率
     print('Loading weights into state dict...')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -153,7 +160,9 @@ if __name__ == "__main__":
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if np.shape(model_dict[k]) ==  np.shape(v)}
     model_dict.update(pretrained_dict)
     model.load_state_dict(model_dict)
-    print('Finished!')
+    '''
+
+    # print('Finished!')
 
     net = model.train()
 
@@ -188,11 +197,24 @@ if __name__ == "__main__":
     #------------------------------------------------------#
     if True:
         lr = 1e-3
-        Batch_size = 4
-        Init_Epoch = 0
-        Freeze_Epoch = 50
+        Batch_size = 128
+        Init_Epoch = 30
+        Freeze_Epoch = 30
         
         optimizer = optim.Adam(net.parameters(),lr,weight_decay=5e-4)
+        if Init_Epoch != 0:
+            l = []
+            for i, log in enumerate(os.listdir("logs")):
+                if log.endswith(".pth"):
+                    l.append(log)
+
+            l = sorted(l, key=lambda a: int(a.split('-')[0].split("h")[1]))
+            print(l[Init_Epoch-1])
+            checkpoint = torch.load(os.path.join("logs", l[Init_Epoch-1]),map_location='cpu')
+            
+            model.load_state_dict(checkpoint["model"])
+            optimizer.load_state_dict(checkpoint["optimizer"])
+
         if Cosine_lr:
             lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=1e-5)
         else:
@@ -225,11 +247,11 @@ if __name__ == "__main__":
 
     if True:
         lr = 1e-4
-        Batch_size = 2
-        Freeze_Epoch = 50
-        Unfreeze_Epoch = 100
+        Batch_size = 16
+        Freeze_Epoch = 30
+        Unfreeze_Epoch = 60
 
-        optimizer = optim.Adam(net.parameters(),lr,weight_decay=5e-4)
+        #optimizer = optim.Adam(net.parameters(),lr,weight_decay=5e-4)
         if Cosine_lr:
             lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=1e-5)
         else:
