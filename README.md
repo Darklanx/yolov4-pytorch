@@ -1,8 +1,9 @@
 ## YOLOV4：You Only Look Once目标检测模型在pytorch当中的实现
 ---
 # NCTU hw2
-要使用作業二的資料集，必須先把annotation轉成VOC的格式，轉好的檔案可以在這邊看https://github.com/penny4860/svhn-voc-annotation-format.
-基本上follow 訓練步驟去產生model所需的format即可。(因為dataset太大所以沒辦法放到github 必須手動搬移)
+要使用作業二的資料集，必須先把annotation轉成VOC的格式，我使用的檔案來自https://github.com/penny4860/svhn-voc-annotation-format.
+
+基本上follow訓練步驟，把data放到指示的位置並按照步驟去生成model所需的format即可。(因為dataset太大所以沒辦法放到github 必須手動搬移)
 
 
 ### 目录
@@ -84,7 +85,7 @@ d、利用video.py可进行摄像头检测。
 2、训练前将标签文件放在VOCdevkit文件夹下的VOC2007文件夹下的Annotation中。  
 3、训练前将图片文件放在VOCdevkit文件夹下的VOC2007文件夹下的JPEGImages中。  
 4、在训练前利用voc2yolo4.py文件生成对应的txt。  
-5、再运行根目录下的voc_annotation.py，运行前需要将classes改成你自己的classes。**注意不要使用中文标签，文件夹中不要有空格！**   
+5、再运行根目录下的voc_annotation.py，运行前需要将classes改成你自己的classes。**注意不要使用中文标签，文件夹中不要有空格！**  不必生成validation set, 這部分在train.py裡面有處理
 ```python
 classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 ```
