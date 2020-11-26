@@ -66,7 +66,7 @@ c、运行predict.py
 4、在训练前利用voc2yolo4.py文件生成对应的txt。  
 5、再运行根目录下的voc_annotation.py，运行前需要将classes改成你自己的classes。**注意不要使用中文标签，文件夹中不要有空格！**  不必生成validation set, 這部分在train.py裡面有處理
 ```python
-classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+classes = ["10", "1", "2" ....]
 ```
 6、此时会生成对应的2007_train.txt，每一行对应其**图片位置**及其**真实框的位置**。  
 7、**在训练前需要务必在model_data下新建一个txt文档，文档中输入需要分的类，在train.py中将classes_path指向该文件**，示例如下：   
@@ -75,8 +75,11 @@ classes_path = 'model_data/new_classes.txt'
 ```
 model_data/new_classes.txt文件内容为：   
 ```python
-cat
-dog
+10
+1
+2
+3
+...
 ...
 ```
 8、运行train.py即可开始训练。
