@@ -1,5 +1,9 @@
 ## YOLOV4：You Only Look Once目标检测模型在pytorch当中的实现
 ---
+# NCTU hw2
+要使用作業二的資料集，必須先把annotation轉成VOC的格式，轉好的檔案可以在這邊看https://github.com/penny4860/svhn-voc-annotation-format.
+基本上follow 訓練步驟去產生model所需的format即可。(因為dataset太大所以沒辦法放到github 必須手動搬移)
+
 
 ### 目录
 1. [性能情况 Performance](#性能情况)
